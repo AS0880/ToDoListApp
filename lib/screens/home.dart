@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:todolist/widgets/todo_items.dart';
 import '../model/todo.dart';
 
-final todosList = ToDo.todoList;
-final _todoController = TextEditingController();
+final todoList = ToDo.todoList;
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -13,6 +12,25 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  late TextEditingController controller;
+  bool isButtonActive = true;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = TextEditingController();
+    controller.addListener(() {
+      final isButtonActive = controller.text.isNotEmpty;
+      setState(() => this.isButtonActive = isButtonActive);
+    });
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,13 +48,16 @@ class _HomeState extends State<Home> {
                 ),
                 Expanded(
                   child: ListView.builder(
-                    itemCount: todosList.length,
-                    itemBuilder: (listViewContext, index){
+                    itemCount: todoList.length,
+                    itemBuilder: (listViewContext, index) {
                       return Dismissible(
-                        key: Key(todosList.toString()),
-                        child: ToDoItem(todo: todosList[index],),
-                        onDismissed: (type) {
-                          // final action = type == DismissDirection.endToStart;
+                        direction: DismissDirection.endToStart,
+                        key: Key(todoList.toString()),
+                        child: ToDoItem(
+                          todo: todoList[index],
+                        ),
+                        onDismissed: (direction) {
+                          todoList.removeAt(index);
                         },
                       );
                     },
@@ -50,17 +71,15 @@ class _HomeState extends State<Home> {
     );
   }
 
-
   void _addToDoItem(String toDo) {
     setState(() {
-      todosList.add(ToDo(
+      todoList.add(ToDo(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         todoText: toDo,
       ));
     });
-    _todoController.clear();
+    controller.clear();
   }
-
 
   Widget textField() {
     return Align(
@@ -83,7 +102,8 @@ class _HomeState extends State<Home> {
                   borderRadius: BorderRadius.circular(120),
                 ),
                 child: TextField(
-                  controller: _todoController,
+                  controller: controller, //_todoController,
+                  //_todoController.addListener(() { final isButtonActive = controller.text.isNotEmpty})
                   decoration: InputDecoration(
                       hintText: "Write your task here",
                       border: InputBorder.none),
@@ -97,9 +117,12 @@ class _HomeState extends State<Home> {
                   "+",
                   style: TextStyle(fontSize: 20),
                 ),
-                onPressed: () {
-                  _addToDoItem(_todoController.text);
-                },
+                onPressed: isButtonActive
+                    ? () {
+                        setState(() => isButtonActive = false);
+                        _addToDoItem(controller.text);
+                      }
+                    : null,
                 style: ElevatedButton.styleFrom(
                   primary: Colors.green,
                   minimumSize: Size(45, 45),
@@ -115,4 +138,5 @@ class _HomeState extends State<Home> {
     return AppBar(
       backgroundColor: Colors.lightBlueAccent,
     );
-}}
+  }
+}
