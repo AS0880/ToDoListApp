@@ -1,4 +1,4 @@
-Sholudko Andrii
-a.p.sholudko@gmail.com
-~6 hours.
-/apk-release.apk
+Name: Sholudko Andrii
+Email: a.p.sholudko@gmail.com
+Spent time: ~6 hours.
+Apk: /apk-release.apk
